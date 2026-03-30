@@ -1,0 +1,587 @@
+\documentclass[11pt,a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{longtable}
+\usepackage{array}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, urlcolor=blue!60!black, citecolor=blue!60!black}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small FootyStats --- Algorithms \& Statistical Methods}
+\fancyhead[R]{\small \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}{\large\bfseries\color{blue!60!black}}{}{0em}{}[\vspace{-0.5em}\rule{\textwidth}{0.4pt}]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+% ── Document ──────────────────────────────────────────────────────────────
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries FootyStats Analytics Platform}\\[6pt]
+  {\large Algorithms \& Statistical Methods Reference}\\[10pt]
+  {\normalsize Prepared for presentation and explanation of the unified
+   season analytics + xG model system}\\[4pt]
+  {\small\today}
+\end{center}
+
+\vspace{1em}
+
+\tableofcontents
+\newpage
+
+% ======================================================================
+\section{Overview}
+% ======================================================================
+
+The FootyStats system comprises two complementary machine-learning pipelines
+that share a single player--season CSV as input:
+
+\begin{enumerate}
+  \item \textbf{Season Analytics} --- a regression-based pipeline that
+        engineers per-game statistics, scores players, predicts season goals,
+        and projects next-season performance.
+  \item \textbf{Expected Goals (xG) Model} --- a classification-based pipeline
+        that generates synthetic shot-level events and trains a probabilistic
+        model estimating the likelihood that any given shot becomes a goal.
+\end{enumerate}
+
+The remainder of this document catalogues every algorithm, distribution,
+formula, and evaluation metric used in each stage so you can explain exactly
+\emph{what} was used and \emph{why}.
+
+
+% ======================================================================
+\section{Data Simulation \& Synthetic Shot Generation}
+% ======================================================================
+
+Because the raw data is at the player--season aggregation level (one row per
+player per season), we must synthesise shot-level events before training the
+xG model.  The following statistical methods are used.
+
+\subsection{Estimating Number of Shots (Heuristic Rate Model)}
+
+For each player we estimate total shots in the season as:
+\[
+  n_{\text{shots}} = \max\!\bigl(\,\text{round}(\text{appearances}
+    \times r_{\text{pos}}),\; n_{\min}\bigr)
+\]
+where $r_{\text{pos}}$ is a position-dependent shots-per-appearance rate:
+
+\begin{center}
+\begin{tabular}{lc}
+  \toprule
+  Position   & $r_{\text{pos}}$ \\
+  \midrule
+  Forward    & 2.5  \\
+  Midfielder & 1.0  \\
+  Defender   & 0.3  \\
+  Goalkeeper & 0.05 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+and $n_{\min}=3$ ensures every player contributes training signal.
+
+\subsection{Shot Outcome Simulation --- Binomial Distribution}
+
+Given $n$ estimated shots and $g$ observed goals for a player, we model
+each shot as an independent Bernoulli trial:
+\[
+  \text{is\_goal}_i \sim \mathrm{Bernoulli}(p), \qquad
+  p = \min\!\Bigl(\frac{g}{n},\; 0.95\Bigr)
+\]
+Implemented via NumPy's \texttt{rng.binomial(1, p, size=n)}.  The cap at
+0.95 prevents degenerate probabilities for very small $n$.
+
+\subsection{Shot Location --- Gaussian (Normal) Distribution}
+
+Pitch coordinates $(x, y)$ for each shot are sampled from position-dependent
+Gaussian distributions.  The pitch is 105\,m $\times$ 68\,m with the
+attacking goal at $(105, 34)$.
+
+\[
+  x \sim \mathcal{N}(\mu_x^{\text{pos}},\;\sigma_x^{\text{pos}}), \qquad
+  y \sim \mathcal{N}(34,\;\sigma_y^{\text{pos}})
+\]
+
+\begin{center}
+\begin{tabular}{lccc}
+  \toprule
+  Position   & $\mu_x$ & $\sigma_x$ & $\sigma_y$ \\
+  \midrule
+  Forward    & 90  & 5  & 10 \\
+  Midfielder & 83  & 8  & 14 \\
+  Defender   & 77  & 10 & 18 \\
+  Goalkeeper & 75  & 12 & 20 \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+Values are clamped to the pitch boundaries $[0, 105] \times [0, 68]$.
+
+\subsection{Contextual Feature Simulation}
+
+\begin{itemize}[nosep]
+  \item \textbf{Match minute} --- Discrete Uniform distribution,
+        $U\{1, 90\}$.
+  \item \textbf{Score difference} --- Categorical distribution over
+        $\{-2, -1, 0, +1, +2\}$ with probabilities
+        $(0.10, 0.20, 0.40, 0.20, 0.10)$.
+  \item \textbf{Under pressure} --- Bernoulli$(0.35)$.
+  \item \textbf{Body part} --- Categorical: foot ($p=0.82$),
+        head ($p=0.18$).
+  \item \textbf{Shot type} --- Categorical: open play ($p=0.80$),
+        set piece ($p=0.20$).
+\end{itemize}
+
+\subsection{Stratified Train / Test Split}
+
+The shot dataset is split 80\%/20\% using \textbf{stratified sampling} on
+the binary \texttt{is\_goal} label, ensuring the goal/non-goal ratio is
+preserved in both partitions.  Implemented via scikit-learn's
+\texttt{train\_test\_split} with \texttt{stratify=y}.
+
+
+% ======================================================================
+\section{Feature Engineering}
+% ======================================================================
+
+\subsection{Shot Distance --- Euclidean Distance}
+
+The straight-line distance from the shot location $(x, y)$ to the goal
+centre $(x_g, y_g) = (105, 34)$:
+\[
+  d = \sqrt{(x_g - x)^2 + (y - y_g)^2}
+\]
+
+\subsection{Shot Angle --- Inverse Tangent (atan2)}
+
+The bearing angle from the shot location to the goal centre:
+\[
+  \theta = \arctan\!\Bigl(\frac{|y - y_g|}{\max(x_g - x,\;10^{-6})}\Bigr)
+\]
+This returns a value in $[0, \frac{\pi}{2}]$ radians.  Smaller angles
+correspond to more central, closer shots (higher scoring probability).
+The $\varepsilon = 10^{-6}$ floor prevents division by zero.
+
+\subsection{Player Performance Score --- Weighted Linear Combination}
+
+In the season analytics pipeline, a composite performance score is computed:
+\[
+  S = 3.0 \cdot \frac{\text{goals}}{\text{apps}}
+    + 1.5 \cdot \frac{\text{assists}}{\text{apps}}
+    + 1.0 \cdot \frac{\text{apps}}{\max(\text{apps})}
+    - 0.2 \cdot (\text{yellows} + 3 \times \text{reds})
+\]
+
+\subsection{Label Encoding}
+
+Player positions (\textit{Forward}, \textit{Midfielder}, \textit{Defender},
+\textit{Goalkeeper}) are mapped to integers via scikit-learn's
+\texttt{LabelEncoder} for the season regression model.
+
+\subsection{One-Hot Encoding}
+
+For the xG classification model, categorical features (\texttt{body\_part},
+\texttt{shot\_type}, \texttt{player\_position}) are converted to binary
+dummy columns via scikit-learn's \texttt{OneHotEncoder}.
+
+\subsection{Z-Score Standardisation}
+
+Numeric features (shot distance, shot angle, match minute, score
+difference, under pressure) are standardised to zero mean and unit
+variance:
+\[
+  z = \frac{x - \bar{x}}{s}
+\]
+where $\bar{x}$ and $s$ are the training-set mean and standard deviation.
+Implemented via scikit-learn's \texttt{StandardScaler}.
+
+
+% ======================================================================
+\section{Season Analytics --- Regression Models}
+% ======================================================================
+
+Three regression algorithms predict the total number of season goals per
+player.
+
+\subsection{Ridge Regression (L2-Regularised Linear Regression)}
+
+Ridge regression minimises the sum of squared residuals plus an L2 penalty:
+\[
+  \hat{\boldsymbol{\beta}} = \arg\min_{\boldsymbol{\beta}}
+  \left\{
+    \sum_{i=1}^{n}(y_i - \mathbf{x}_i^\top \boldsymbol{\beta})^2
+    + \alpha \|\boldsymbol{\beta}\|_2^2
+  \right\}
+\]
+where $\alpha = 1.0$ controls regularisation strength.  The closed-form
+solution is:
+\[
+  \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X}
+    + \alpha\,\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{y}
+\]
+
+\textbf{Why used:} Simple, interpretable baseline.  L2 regularisation
+prevents overfitting on the small dataset and handles multicollinearity.
+
+\subsection{Random Forest Regressor (Bagging Ensemble)}
+
+An ensemble of $B = 200$ decision trees, each trained on a bootstrap
+sample of the data and a random subset of features:
+\[
+  \hat{y} = \frac{1}{B}\sum_{b=1}^{B} T_b(\mathbf{x})
+\]
+where each tree $T_b$ is limited to \texttt{max\_depth}$\,= 4$.
+Randomness is injected at two levels: \emph{bagging} (row sampling with
+replacement) and \emph{feature bagging} (random column subsets at each
+split).
+
+\textbf{Why used:} Captures non-linear feature interactions that Ridge
+cannot.  Limiting depth prevents overfitting.
+
+\subsection{Gradient Boosting Regressor (Boosting Ensemble)}
+
+Builds an additive model of $M = 100$ shallow trees sequentially, each
+fitting the \emph{residuals} of the previous ensemble:
+\[
+  F_m(\mathbf{x}) = F_{m-1}(\mathbf{x})
+    + \eta \cdot h_m(\mathbf{x})
+\]
+where $\eta$ is the learning rate and $h_m$ is a regression tree of
+\texttt{max\_depth}$\,= 3$.  The algorithm minimises mean squared error
+by gradient descent in function space.
+
+\textbf{Why used:} Often the top performer for tabular data.  Sequential
+correction of errors typically yields lower bias than bagging.
+
+\subsection{Model Selection --- Leave-One-Out Cross-Validation (LOO-CV)}
+
+For a dataset of $n$ players, LOO-CV trains $n$ models, each leaving one
+player out for validation:
+\[
+  \mathrm{MAE}_{\text{LOO}} = \frac{1}{n}\sum_{i=1}^{n}
+    |y_i - \hat{y}_{-i}|
+\]
+The model with the lowest LOO-CV MAE is selected.
+
+\textbf{Why used:} With only $\sim$89 players, $k$-fold CV would yield
+very small folds.  LOO-CV uses the maximum possible training data at each
+iteration, giving the most unbiased error estimate for small datasets.
+
+
+% ======================================================================
+\section{xG Model --- Classification Algorithms}
+% ======================================================================
+
+Three classification algorithms estimate $P(\text{goal}\mid\text{shot
+features})$.
+
+\subsection{Logistic Regression (Baseline)}
+
+Models the log-odds of a goal as a linear function of features:
+\[
+  \log\frac{P(y=1 \mid \mathbf{x})}{1 - P(y=1 \mid \mathbf{x})}
+  = \boldsymbol{\beta}^\top \mathbf{x}
+\]
+Solving for the probability via the sigmoid function:
+\[
+  P(y=1 \mid \mathbf{x}) = \sigma(\boldsymbol{\beta}^\top \mathbf{x})
+  = \frac{1}{1 + e^{-\boldsymbol{\beta}^\top \mathbf{x}}}
+\]
+Parameters are estimated by \textbf{Maximum Likelihood Estimation} (MLE),
+optimised using the \textbf{L-BFGS} quasi-Newton method.  An L2 penalty
+is applied with regularisation strength $C \in \{0.1, 1.0, 10.0\}$
+(inverse of $\alpha$).
+
+\textbf{Why used:} Directly outputs calibrated probabilities (the sigmoid
+is itself a proper scoring function).  Serves as the interpretable
+baseline.
+
+\subsection{Random Forest Classifier (Bagging Ensemble)}
+
+An ensemble of $B$ decision trees for classification.  The predicted
+probability is the fraction of trees that vote ``goal'':
+\[
+  P(y=1 \mid \mathbf{x}) = \frac{1}{B}\sum_{b=1}^{B}
+    \mathbb{1}[T_b(\mathbf{x}) = 1]
+\]
+Hyperparameter search space:
+\begin{itemize}[nosep]
+  \item \texttt{n\_estimators} $\in \{200, 400\}$
+  \item \texttt{max\_depth} $\in \{\text{None}, 5, 10\}$
+  \item \texttt{min\_samples\_leaf} $\in \{1, 5\}$
+\end{itemize}
+Class weights are set to \texttt{balanced\_subsample} to handle the
+class imbalance ($\sim$14\% goal rate).
+
+\textbf{Why used:} Robust to overfitting, naturally handles non-linear
+boundaries and feature interactions.
+
+\subsection{Gradient Boosting Classifier (Boosting Ensemble)}
+
+Sequentially builds trees that correct previous errors, optimising the
+\textbf{binomial deviance} (log loss) as the loss function:
+\[
+  \mathcal{L} = -\frac{1}{n}\sum_{i=1}^{n}\bigl[
+    y_i \log p_i + (1 - y_i)\log(1 - p_i)
+  \bigr]
+\]
+Hyperparameter search space:
+\begin{itemize}[nosep]
+  \item \texttt{n\_estimators} $\in \{100, 200\}$
+  \item \texttt{learning\_rate} $\in \{0.05, 0.1\}$
+  \item \texttt{max\_depth} $\in \{2, 3\}$
+\end{itemize}
+
+\textbf{Why used:} Typically achieves the best predictive accuracy for
+tabular classification tasks.  The sequential error-correction is
+particularly effective for probability estimation.
+
+\subsection{Hyperparameter Tuning --- Grid Search with $k$-Fold CV}
+
+All xG models are tuned via exhaustive \textbf{Grid Search} with
+$k = 5$-fold cross-validation.  The scoring metric is
+\textbf{negative log loss} (lower is better), ensuring we optimise
+for probability quality rather than just classification accuracy:
+\[
+  \text{score} = -\mathcal{L}_{\text{log loss}}
+\]
+Implemented via scikit-learn's \texttt{GridSearchCV}.
+
+\subsection{Probability Calibration --- Isotonic Regression}
+
+After selecting the best model, we apply \textbf{isotonic regression
+calibration} via \texttt{CalibratedClassifierCV} on held-out validation
+data.  This is a non-parametric method that fits a monotonically
+non-decreasing step function mapping raw model outputs to calibrated
+probabilities:
+\[
+  \hat{p}_{\text{calibrated}} = f_{\text{isotonic}}(\hat{p}_{\text{raw}})
+\]
+where $f$ is a piecewise-constant, non-decreasing function fitted by
+minimising:
+\[
+  \min_{f} \sum_{i=1}^{n} (y_i - f(\hat{p}_i))^2
+  \quad\text{s.t.}\quad f \text{ is non-decreasing}
+\]
+solved via the Pool Adjacent Violators (PAV) algorithm.
+
+\textbf{Why used:} Tree-based models often produce poorly calibrated
+probabilities.  For xG, calibration is critical --- we need
+$P(\text{goal}) = 0.15$ to truly mean 15\% of such shots are scored.
+
+
+% ======================================================================
+\section{Evaluation Metrics}
+% ======================================================================
+
+\subsection{Mean Absolute Error (MAE) --- Season Goal Model}
+\[
+  \mathrm{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
+\]
+Measures the average absolute difference between actual and predicted
+season goals.  Expressed in the same units as the target (goals).
+
+\subsection{Log Loss (Binary Cross-Entropy) --- xG Model}
+\[
+  \mathcal{L}_{\text{log}} = -\frac{1}{n}\sum_{i=1}^{n}
+  \bigl[y_i\log(\hat{p}_i) + (1-y_i)\log(1-\hat{p}_i)\bigr]
+\]
+The primary metric for the xG model.  Heavily penalises confident wrong
+predictions (e.g.\ predicting $\hat{p} = 0.95$ when $y = 0$).
+Lower is better; a perfect model achieves 0.
+
+\subsection{ROC-AUC (Area Under the Receiver Operating Characteristic Curve)}
+
+The ROC curve plots True Positive Rate vs.\ False Positive Rate across
+all decision thresholds.  AUC summarises discrimination ability:
+\[
+  \mathrm{AUC} = \int_0^1 \mathrm{TPR}(t)\;\mathrm{d}\,\mathrm{FPR}(t)
+\]
+\begin{itemize}[nosep]
+  \item $\mathrm{AUC} = 0.5$: no discrimination (random classifier)
+  \item $\mathrm{AUC} = 1.0$: perfect discrimination
+\end{itemize}
+
+\subsection{Brier Score}
+\[
+  \mathrm{BS} = \frac{1}{n}\sum_{i=1}^{n}(\hat{p}_i - y_i)^2
+\]
+The mean squared error of the predicted probabilities.
+Ranges from 0 (perfect) to 1 (worst).
+
+\subsection{Precision and Recall (at threshold $\tau = 0.5$)}
+\[
+  \text{Precision} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FP}},
+  \qquad
+  \text{Recall} = \frac{\mathrm{TP}}{\mathrm{TP} + \mathrm{FN}}
+\]
+These are threshold-dependent metrics reported at the standard $\tau=0.5$
+decision boundary for completeness.
+
+\subsection{Confusion Matrix}
+
+A $2 \times 2$ table of predicted vs.\ actual classes:
+
+\begin{center}
+\begin{tabular}{l|cc}
+             & Predicted No Goal & Predicted Goal \\ \hline
+  Actual No Goal & TN & FP \\
+  Actual Goal    & FN & TP \\
+\end{tabular}
+\end{center}
+
+\subsection{Calibration Curve (Reliability Diagram)}
+
+Plots predicted probability (binned) against observed goal frequency in
+each bin.  A perfectly calibrated model falls on the diagonal $y = x$.
+We use 10 quantile-based bins.
+
+\subsection{Feature Importance}
+
+\begin{itemize}[nosep]
+  \item \textbf{Tree-based models} --- Gini importance (mean decrease in
+        impurity) accumulated across all trees.  Accessed via
+        \texttt{feature\_importances\_}.
+  \item \textbf{Linear models} --- Absolute coefficient magnitudes
+        $|\beta_j|$ after standardisation.  Accessed via
+        \texttt{coef\_}.
+\end{itemize}
+
+
+% ======================================================================
+\section{Next-Season Projections --- Linear Extrapolation}
+% ======================================================================
+
+Player projections assume per-game rates remain constant:
+\[
+  \widehat{\text{goals}}_{\text{next}} = f_{\text{model}}(\text{proj\_features})
+\]
+where the trained regression model predicts from projected feature values:
+\begin{align*}
+  \text{proj\_apps}_i &= \text{round}\!\bigl(\text{involvement}_i \times N_{\text{games}}\bigr) \\
+  \text{proj\_assists}_i &= \text{assists\_per\_game}_i \times \text{proj\_apps}_i \\
+  \text{proj\_yellow}_i &= \frac{\text{yellows}_i}{\text{apps}_i} \times \text{proj\_apps}_i
+\end{align*}
+with $N_{\text{games}} = 12$.
+
+Team-level projections are aggregated via summation, and a year-over-year
+trend is computed as:
+\[
+  \text{trend}\% = \frac{\text{proj\_goals}_{\text{team}} - \text{current\_goals}_{\text{team}}}
+    {\text{current\_goals}_{\text{team}}} \times 100
+\]
+
+
+% ======================================================================
+\section{Summary Table --- Algorithm to Output Mapping}
+% ======================================================================
+
+\begin{longtable}{>{\raggedright}p{4.5cm} p{4.5cm} p{5.5cm}}
+  \toprule
+  \textbf{Output / Statistic} & \textbf{Algorithm} & \textbf{Key Formula / Method} \\
+  \midrule
+  \endhead
+
+  Shot outcomes (is\_goal) &
+    Binomial / Bernoulli trials &
+    $\text{is\_goal} \sim \text{Bernoulli}(g/n)$ \\[4pt]
+
+  Shot location $(x, y)$ &
+    Gaussian (Normal) distribution &
+    $x \sim \mathcal{N}(\mu, \sigma^2)$ per position \\[4pt]
+
+  Shot distance &
+    Euclidean distance &
+    $d = \sqrt{(x_g - x)^2 + (y_g - y)^2}$ \\[4pt]
+
+  Shot angle &
+    Inverse tangent (atan2) &
+    $\theta = \arctan(|y - y_g| / (x_g - x))$ \\[4pt]
+
+  Performance score &
+    Weighted linear combination &
+    $S = 3g/a + 1.5a/a + 1.0i - 0.2d$ \\[4pt]
+
+  Numeric scaling &
+    Z-score standardisation &
+    $z = (x - \bar{x}) / s$ \\[4pt]
+
+  Categorical encoding &
+    One-Hot Encoding &
+    Binary dummy columns \\[4pt]
+
+  Season goals prediction &
+    Ridge / RF / GB Regression &
+    LOO-CV, MAE selection \\[4pt]
+
+  xG probability &
+    LogReg / RF / GB Classification &
+    5-fold GridSearchCV, log loss \\[4pt]
+
+  Probability calibration &
+    Isotonic regression (PAV) &
+    Non-parametric monotone mapping \\[4pt]
+
+  Model accuracy (goals) &
+    LOO-CV MAE &
+    $\frac{1}{n}\sum|y_i - \hat{y}_{-i}|$ \\[4pt]
+
+  Model accuracy (xG) &
+    Log loss, ROC-AUC, Brier score &
+    See Section 5 \\[4pt]
+
+  Feature importance &
+    Gini importance / $|\beta|$ &
+    Model-dependent \\[4pt]
+
+  Next-season projections &
+    Linear extrapolation + ML predict &
+    Rate $\times$ projected appearances \\
+
+  \bottomrule
+\end{longtable}
+
+
+% ======================================================================
+\section{Software \& Libraries}
+% ======================================================================
+
+\begin{itemize}[nosep]
+  \item \textbf{Python 3.13}
+  \item \textbf{scikit-learn} --- Ridge, RandomForest, GradientBoosting,
+        LogisticRegression, StandardScaler, OneHotEncoder, GridSearchCV,
+        CalibratedClassifierCV, LOO-CV, all evaluation metrics
+  \item \textbf{NumPy} --- random number generation (Gaussian, Binomial,
+        Uniform, Categorical), array operations
+  \item \textbf{pandas} --- data manipulation, groupby aggregations
+  \item \textbf{matplotlib} --- diagnostic plots (ROC, PR, confusion
+        matrix, calibration curve, feature importance)
+  \item \textbf{joblib} --- model serialisation
+\end{itemize}
+
+
+\vfill
+\begin{center}
+\rule{0.6\textwidth}{0.4pt}\\[4pt]
+{\small\itshape Generated for the FootyStats Analytics Platform.
+All algorithms implemented via scikit-learn with reproducible
+random seed (42).}
+\end{center}
+
+\end{document}

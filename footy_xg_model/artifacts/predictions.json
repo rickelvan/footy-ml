@@ -1,0 +1,152 @@
+[
+  {
+    "player_name": "Fahad",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 88.66144586476263,
+    "y": 29.66573015218491,
+    "match_minute": 54,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Glenn",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 95.01281498104954,
+    "y": 10.107077711320109,
+    "match_minute": 43,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Kaka",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 91.90011649524307,
+    "y": 24.129448454631135,
+    "match_minute": 27,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Glenn",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 74.536989883753,
+    "y": 52.158800750876225,
+    "match_minute": 6,
+    "xg": 0.09302325581395349,
+    "actual": 0
+  },
+  {
+    "player_name": "Boogie",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 69.07744347732462,
+    "y": 40.4617548514579,
+    "match_minute": 30,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Uncle Li",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 89.97683513887827,
+    "y": 44.4553227478968,
+    "match_minute": 25,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Brave",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 68.08501441795691,
+    "y": 23.554312091421195,
+    "match_minute": 12,
+    "xg": 0.13333333333333333,
+    "actual": 0
+  },
+  {
+    "player_name": "Manscta",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 99.66878595279735,
+    "y": 35.298166873135344,
+    "match_minute": 43,
+    "xg": 0.09302325581395349,
+    "actual": 0
+  },
+  {
+    "player_name": "Kaka",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 92.46715994091848,
+    "y": 33.59657613465988,
+    "match_minute": 82,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "OJ",
+    "player_position": "Midfielder",
+    "body_part": "head",
+    "x": 92.46484326838456,
+    "y": 49.83900013154645,
+    "match_minute": 90,
+    "xg": 0.09302325581395349,
+    "actual": 0
+  },
+  {
+    "player_name": "Pius",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 89.79736201958795,
+    "y": 26.559603367704874,
+    "match_minute": 71,
+    "xg": 0.13333333333333333,
+    "actual": 1
+  },
+  {
+    "player_name": "Ian Jabel",
+    "player_position": "Defender",
+    "body_part": "head",
+    "x": 66.64346247174188,
+    "y": 3.855706995321576,
+    "match_minute": 77,
+    "xg": 0.1875,
+    "actual": 0
+  },
+  {
+    "player_name": "Alvin K",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 79.38062540055822,
+    "y": 43.22247941171938,
+    "match_minute": 10,
+    "xg": 0.09302325581395349,
+    "actual": 0
+  },
+  {
+    "player_name": "Oroma",
+    "player_position": "Forward",
+    "body_part": "foot",
+    "x": 84.35998395778238,
+    "y": 48.639264045143335,
+    "match_minute": 52,
+    "xg": 0.13333333333333333,
+    "actual": 1
+  },
+  {
+    "player_name": "Marrison",
+    "player_position": "Midfielder",
+    "body_part": "foot",
+    "x": 97.43144386602295,
+    "y": 35.88467210851635,
+    "match_minute": 84,
+    "xg": 0.0,
+    "actual": 0
+  }
+]

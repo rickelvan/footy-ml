@@ -1,0 +1,54 @@
+[
+  {
+    "feature": "Shot Angle",
+    "importance": 0.3827
+  },
+  {
+    "feature": "Shot Distance",
+    "importance": 0.3557
+  },
+  {
+    "feature": "Match Minute",
+    "importance": 0.0966
+  },
+  {
+    "feature": "Player Position Defender",
+    "importance": 0.0883
+  },
+  {
+    "feature": "Score Diff",
+    "importance": 0.0644
+  },
+  {
+    "feature": "Player Position Goalkeeper",
+    "importance": 0.0092
+  },
+  {
+    "feature": "Player Position Forward",
+    "importance": 0.0031
+  },
+  {
+    "feature": "Under Pressure",
+    "importance": 0.0
+  },
+  {
+    "feature": "Body Part Foot",
+    "importance": 0.0
+  },
+  {
+    "feature": "Body Part Head",
+    "importance": 0.0
+  },
+  {
+    "feature": "Shot Type Open Play",
+    "importance": 0.0
+  },
+  {
+    "feature": "Shot Type Set Piece",
+    "importance": 0.0
+  },
+  {
+    "feature": "Player Position Midfielder",
+    "importance": 0.0
+  }
+]

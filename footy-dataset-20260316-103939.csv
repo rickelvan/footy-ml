@@ -1,0 +1,91 @@
+team_id,team_name,team_short_name,team_logo,player_id,player_name,player_position,player_photo,season,appearances,goals,assists,yellow_cards,red_cards,clean_sheets,saves
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,31,Humble,Midfielder,,2025,5,3,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,31,Humble,Midfielder,,2026,23,0,1,1,0,6,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,27,"Ian Jabel",Defender,,2025,3,0,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,17,Marvin,Defender,,2025,10,1,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,17,Marvin,Defender,,2026,21,0,0,0,0,6,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,29,Morgan,Defender,,2025,3,0,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,30,Trevor,Midfielder,,2025,3,0,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,26,Wallace,Defender,,2025,8,0,0,0,0,0,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,26,Wallace,Defender,,2026,28,0,0,0,0,6,0
+5,"Dragons FC",DRAGO,logo_68c80bf76cbdb3.17653542.png,46,William,Midfielder,,2025,4,0,0,0,0,0,0
+8,"Fut Champs",FUTTS,logo_6985af7a523623.89669796.jpeg,18,Justin,Midfielder,,2025,10,8,2,0,0,0,0
+8,"Fut Champs",FUTTS,logo_6985af7a523623.89669796.jpeg,18,Justin,Midfielder,,2026,28,4,0,0,0,6,0
+8,"Fut Champs",FUTTS,logo_6985af7a523623.89669796.jpeg,67,Travis,Forward,,2026,16,2,0,0,0,3,0
+8,"Fut Champs",FUTTS,logo_6985af7a523623.89669796.jpeg,19,"Uncle Li",Forward,,2025,10,2,1,0,0,0,0
+8,"Fut Champs",FUTTS,logo_6985af7a523623.89669796.jpeg,19,"Uncle Li",Forward,,2026,27,0,1,0,0,5,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,14,Adengo,Midfielder,,2025,10,3,5,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,14,Adengo,Midfielder,,2026,32,9,3,0,0,19,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,11,Aijuka,Defender,,2025,10,3,3,1,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,11,Aijuka,Defender,,2026,32,5,0,0,0,20,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,50,Bryson,Midfielder,,2026,9,0,1,0,0,4,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,69,Calvin,Midfielder,,2026,14,0,2,4,0,8,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,12,Cedo,Midfielder,,2025,9,1,2,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,12,Cedo,Midfielder,,2026,21,1,0,0,0,10,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,13,Crivin,Midfielder,,2025,9,7,0,2,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,13,Crivin,Midfielder,,2026,32,7,3,7,1,20,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,70,Emmar,Midfielder,,2026,8,2,2,0,0,5,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,7,Hector,Forward,,2025,10,20,0,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,7,Hector,Forward,,2026,32,9,2,0,0,20,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,8,"Ian Victor",Midfielder,,2025,4,0,0,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,8,"Ian Victor",Midfielder,,2026,32,0,0,1,0,20,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,24,Kaka,Forward,,2025,9,1,1,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,24,Kaka,Forward,,2026,31,6,3,0,1,15,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,9,Maine,Midfielder,,2025,9,0,0,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,9,Maine,Midfielder,,2026,27,3,2,0,0,18,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,10,Reagan,Defender,,2025,10,2,3,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,10,Reagan,Defender,,2026,25,0,0,0,0,17,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,25,Williams,Goalkeeper,,2025,9,0,0,0,0,0,0
+3,Galacticos,GAL,logo_68c803e51b7471.81070071.png,25,Williams,Goalkeeper,,2026,24,1,1,0,0,13,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,34,Aaron,Midfielder,,2025,10,0,0,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,34,Aaron,Midfielder,,2026,28,3,1,1,2,13,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,15,Fahad,Forward,,2025,9,9,2,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,15,Fahad,Forward,,2026,27,6,6,0,0,13,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,22,Glenn,Midfielder,,2025,8,3,2,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,28,Jeffers,Midfielder,,2025,9,1,2,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,28,Jeffers,Midfielder,,2026,24,3,0,1,0,9,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,32,Jeremiah,Midfielder,,2025,9,0,0,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,32,Jeremiah,Midfielder,,2026,31,0,0,1,0,15,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,68,Jimmy,Midfielder,,2026,11,1,1,0,0,4,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,66,Locha,Midfielder,,2026,23,2,0,0,0,11,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,45,Mark,Goalkeeper,,2025,9,0,0,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,65,Marrison,Midfielder,,2026,24,1,2,0,0,12,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,44,Myles,Midfielder,,2025,5,0,0,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,33,Owino,Midfielder,,2025,6,3,1,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,33,Owino,Midfielder,,2026,24,1,1,0,0,12,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,23,Phoenix,Defender,,2025,8,0,0,1,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,63,Pius,Midfielder,,2026,26,3,3,1,0,13,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,64,Taban,Goalkeeper,,2026,8,0,0,0,0,5,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,21,Trent,Defender,,2025,10,2,1,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,21,Trent,Defender,,2026,30,2,2,0,0,14,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,41,Val,Midfielder,,2025,8,16,7,0,0,0,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,73,Val,Forward,,2026,3,2,0,0,0,1,0
+4,"Law FC",Law,logo_68c80a5968d752.13810530.png,42,Yoga,Forward,,2025,5,0,0,0,0,0,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,52,Aggrey,Defender,,2026,31,0,0,0,0,19,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,62,"Alvin K",Forward,,2026,18,0,0,0,0,13,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,51,Anyaar,Forward,,2026,11,1,1,0,0,9,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,53,Boogie,Midfielder,,2026,23,5,1,0,0,14,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,16,Gareth,Defender,,2025,9,3,2,4,0,0,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,16,Gareth,Defender,,2026,32,0,3,4,0,19,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,40,Moze,Midfielder,,2025,5,0,0,0,0,0,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,40,Moze,Midfielder,,2026,27,1,0,0,1,15,0
+6,"Mamba fc",MAMBA,logo_69824fa32aa000.99500838.jpeg,72,Shane,Forward,,2026,8,1,1,0,0,6,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,6,Absolom,Defender,,2025,6,0,0,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,5,Jew,Forward,,2025,1,0,0,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,20,Lucky,Forward,,2025,10,6,4,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,3,Nate,Midfielder,,2025,9,3,2,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,3,Nate,Midfielder,,2026,9,0,0,0,0,6,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,4,OJ,Midfielder,,2025,10,8,5,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,2,Oketa,Defender,,2025,10,4,2,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,1,Oroma,Forward,,2025,3,5,0,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,39,Raba,Midfielder,,2025,10,19,2,0,0,0,0
+2,Santos,SAN,logo_68c43707d1ba43.71006132.png,39,Raba,Midfielder,,2026,14,3,3,0,0,8,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,61,Baker,Midfielder,,2026,27,0,1,0,0,16,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,58,Brave,Midfielder,,2026,28,1,1,0,0,16,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,57,Chelimo,Midfielder,,2026,23,0,2,0,0,13,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,56,Enock,Midfielder,,2026,22,1,0,0,0,14,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,60,Gaga,Defender,,2026,13,0,0,0,0,8,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,59,"Ivan Jordan",Midfielder,,2026,6,0,3,0,0,3,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,54,Karim,Forward,,2026,25,8,2,0,0,15,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,71,Manscta,Midfielder,,2026,1,0,2,0,0,1,0
+7,TUPE9ers,TUPe,logo_698445db597fb2.89860952.jpeg,55,"Paul Lomoro",Defender,,2026,24,1,0,1,0,13,0

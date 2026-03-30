@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Football ML Predictions Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+  .hero { background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%);
+           border-bottom: 1px solid #30363d; padding: 40px 32px 32px; }
+  .hero h1 { font-size: 2rem; font-weight: 700; color: #58a6ff; }
+  .hero p  { color: #8b949e; margin-top: 6px; font-size: 0.95rem; }
+  .badge   { display:inline-block; background:#1f6feb22; border:1px solid #1f6feb55;
+              color:#58a6ff; border-radius:20px; padding:3px 12px; font-size:0.8rem; margin-top:10px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 32px; }
+  section { margin-bottom: 40px; }
+  h2 { font-size: 1.1rem; font-weight: 600; color: #f0f6fc; border-left: 3px solid #58a6ff;
+        padding-left: 12px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 20px; }
+  .card .val { font-size: 2rem; font-weight: 700; color: #58a6ff; }
+  .card .lbl { font-size: 0.8rem; color: #8b949e; margin-top: 4px; }
+  .card .sub { font-size: 0.75rem; color: #6e7681; margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  thead th { background: #1c2128; color: #8b949e; font-weight: 500; text-align: left;
+              padding: 10px 14px; border-bottom: 1px solid #30363d; font-size: 0.78rem;
+              text-transform: uppercase; letter-spacing: 0.04em; }
+  tbody tr { border-bottom: 1px solid #21262d; transition: background 0.15s; }
+  tbody tr:hover { background: #1c2128; }
+  tbody td { padding: 10px 14px; color: #c9d1d9; }
+  .tbl-wrap { background: #161b22; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; }
+  .rank { font-weight: 700; color: #58a6ff; width: 30px; }
+  .medal-1 { color: #ffd700; }
+  .medal-2 { color: #c0c0c0; }
+  .medal-3 { color: #cd7f32; }
+  .pos-badge { display:inline-block; border-radius:4px; padding:2px 8px; font-size:0.72rem; font-weight:600; }
+  .pos-Forward    { background:#1a3a1a; color:#56d364; }
+  .pos-Midfielder { background:#1a2a3a; color:#58a6ff; }
+  .pos-Defender   { background:#2a1a3a; color:#bc8cff; }
+  .pos-Goalkeeper { background:#3a2a1a; color:#e3b341; }
+  .bar-wrap { display:flex; align-items:center; gap:10px; }
+  .bar { height:8px; border-radius:4px; background:linear-gradient(90deg,#1f6feb,#58a6ff); min-width:2px; }
+  .risk-high { color: #f85149; }
+  .risk-med  { color: #e3b341; }
+  .risk-low  { color: #56d364; }
+  .breakout-chip { background:#1a3a1a; color:#56d364; border:1px solid #56d36444;
+                    border-radius:12px; padding:2px 10px; font-size:0.72rem; font-weight:600; }
+  .model-box { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:20px; }
+  .model-row { display:flex; justify-content:space-between; align-items:center;
+                padding:10px 0; border-bottom:1px solid #21262d; }
+  .model-row:last-child { border-bottom:none; }
+  .model-name { color:#c9d1d9; font-size:0.9rem; }
+  .model-mae { font-size:0.85rem; }
+  .model-best { color:#56d364; font-weight:600; }
+  .model-other { color:#8b949e; }
+  .winner-tag { background:#1a3a1a; color:#56d364; border-radius:6px; padding:1px 8px; font-size:0.72rem; }
+  .feat-row { display:flex; align-items:center; gap:12px; padding:6px 0; }
+  .feat-name { width:180px; color:#c9d1d9; font-size:0.85rem; }
+  .feat-bar  { flex:1; height:8px; border-radius:4px; background:#21262d; }
+  .feat-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#58a6ff,#a78bfa); }
+  .feat-val  { width:48px; text-align:right; color:#8b949e; font-size:0.8rem; }
+  .note { background:#1c2128; border:1px solid #30363d; border-radius:8px;
+           padding:14px 18px; font-size:0.82rem; color:#8b949e; margin-top:20px; line-height:1.6; }
+  .note strong { color:#e3b341; }
+  footer { text-align:center; padding:32px; color:#6e7681; font-size:0.78rem; border-top:1px solid #21262d; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>⚽ Football ML Predictions</h1>
+  <p>Machine learning model trained on 2025 season data — projecting next season performance</p>
+  <span class="badge">Ridge Regression · LOO-CV Validated · ±3.2 goal accuracy</span>
+</div>
+<main>
+  <section>
+    <h2>2025 Season Overview</h2>
+    <div class="grid-4">
+      <div class="card"><div class="val">42</div><div class="lbl">Players analysed</div><div class="sub">4 teams · 1 season</div></div>
+      <div class="card"><div class="val">133</div><div class="lbl">Total Goals Scored</div><div class="sub">across all teams</div></div>
+      <div class="card"><div class="val">49</div><div class="lbl">Total Assists</div><div class="sub">across all teams</div></div>
+      <div class="card"><div class="val">±3.2</div><div class="lbl">Model Accuracy</div><div class="sub">mean absolute error (goals)</div></div>
+    </div>
+  </section>
+  <section>
+    <h2>Team Performance — 2025 Season</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Team</th><th>Goals</th><th>Assists</th><th>Apps</th><th>Goals / App</th><th>Squad</th></tr></thead>
+        <tbody><tr>
+      <td class="rank medal-1">1</td>
+      <td>Santos</td>
+      <td>45</td><td>15</td>
+      <td>59</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:100px"></div> 0.763</div></td>
+      <td>8</td>
+    </tr><tr>
+      <td class="rank medal-2">2</td>
+      <td>Galacticos</td>
+      <td>37</td><td>14</td>
+      <td>95</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:51px"></div> 0.389</div></td>
+      <td>11</td>
+    </tr><tr>
+      <td class="rank medal-3">3</td>
+      <td>Law FC</td>
+      <td>34</td><td>15</td>
+      <td>96</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:46px"></div> 0.354</div></td>
+      <td>12</td>
+    </tr><tr>
+      <td class="rank ">4</td>
+      <td>Dragons FC</td>
+      <td>17</td><td>5</td>
+      <td>70</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:31px"></div> 0.243</div></td>
+      <td>11</td>
+    </tr></tbody>
+      </table>
+    </div>
+  </section>
+  <section>
+    <h2>Top 10 Performers — 2025 Season</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Team</th><th>Position</th><th>Apps</th><th>Goals</th><th>Assists</th><th>G+A</th><th>Score</th></tr></thead>
+        <tbody><tr>
+      <td class="rank medal-1">1</td>
+      <td>Val</td><td>Law FC</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>8</td><td>16</td>
+      <td>7</td><td>23</td>
+      <td>8.11</td>
+    </tr><tr>
+      <td class="rank medal-2">2</td>
+      <td>Hector</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Forward">FWD</span></td>
+      <td>10</td><td>20</td>
+      <td>0</td><td>20</td>
+      <td>7.00</td>
+    </tr><tr>
+      <td class="rank medal-3">3</td>
+      <td>Raba</td><td>Santos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>10</td><td>19</td>
+      <td>2</td><td>21</td>
+      <td>7.00</td>
+    </tr><tr>
+      <td class="rank ">4</td>
+      <td>Oroma</td><td>Santos</td>
+      <td><span class="pos-badge pos-Forward">FWD</span></td>
+      <td>3</td><td>5</td>
+      <td>0</td><td>5</td>
+      <td>5.30</td>
+    </tr><tr>
+      <td class="rank ">5</td>
+      <td>Fahad</td><td>Law FC</td>
+      <td><span class="pos-badge pos-Forward">FWD</span></td>
+      <td>9</td><td>9</td>
+      <td>2</td><td>11</td>
+      <td>4.23</td>
+    </tr><tr>
+      <td class="rank ">6</td>
+      <td>OJ</td><td>Santos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>10</td><td>8</td>
+      <td>5</td><td>13</td>
+      <td>4.15</td>
+    </tr><tr>
+      <td class="rank ">7</td>
+      <td>Justin</td><td>Dragons FC</td>
+      <td><span class="pos-badge pos-Defender">DEF</span></td>
+      <td>10</td><td>8</td>
+      <td>2</td><td>10</td>
+      <td>3.70</td>
+    </tr><tr>
+      <td class="rank ">8</td>
+      <td>Lucky</td><td>Santos</td>
+      <td><span class="pos-badge pos-Forward">FWD</span></td>
+      <td>10</td><td>6</td>
+      <td>4</td><td>10</td>
+      <td>3.40</td>
+    </tr><tr>
+      <td class="rank ">9</td>
+      <td>Crivin</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>9</td><td>7</td>
+      <td>0</td><td>7</td>
+      <td>2.83</td>
+    </tr><tr>
+      <td class="rank ">10</td>
+      <td>Adengo</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>10</td><td>3</td>
+      <td>5</td><td>8</td>
+      <td>2.65</td>
+    </tr></tbody>
+      </table>
+    </div>
+  </section>
+  <section>
+    <div class="grid-2">
+      <div>
+        <h2>Model Comparison</h2>
+        <div class="model-box">
+          <div class="model-row">
+            <span class="model-name">🏆 Ridge Regression <span class="winner-tag">SELECTED</span></span>
+            <span class="model-mae model-best">MAE = ±3.16 goals</span>
+          </div>
+          <div class="model-row"><span class="model-name">Random Forest</span><span class="model-mae model-other">MAE = ±3.45 goals</span></div><div class="model-row"><span class="model-name">Gradient Boosting</span><span class="model-mae model-other">MAE = ±3.98 goals</span></div>
+        </div>
+        <div class="note"><strong>Note:</strong> Accuracy validated using Leave-One-Out Cross-Validation — the most reliable method for small datasets.</div>
+      </div>
+      <div>
+        <h2>Feature Importance</h2>
+        <div class="model-box"><div class="feat-row">
+          <div class="feat-name">Assists</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:100%"></div></div>
+          <div class="feat-val">1.013</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Assists Per Game</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:91%"></div></div>
+          <div class="feat-val">0.923</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Appearances</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:33%"></div></div>
+          <div class="feat-val">0.343</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Position Enc</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:13%"></div></div>
+          <div class="feat-val">0.142</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Yellow Cards</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:3%"></div></div>
+          <div class="feat-val">0.036</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Discipline Score</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:3%"></div></div>
+          <div class="feat-val">0.036</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Involvement</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:3%"></div></div>
+          <div class="feat-val">0.034</div>
+        </div><div class="feat-row">
+          <div class="feat-name">Red Cards</div>
+          <div class="feat-bar"><div class="feat-fill" style="width:0%"></div></div>
+          <div class="feat-val">0.000</div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2>Next Season Projections (12 Games)</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Player</th><th>Team</th><th>Position</th><th>Proj Apps</th><th>Proj Goals</th><th>Proj Assists</th><th>Proj G+A</th></tr></thead>
+        <tbody><tr>
+      <td class="rank medal-1">1</td>
+      <td>Val</td><td>Law FC</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>10</td>
+      <td><strong>12.6</strong></td>
+      <td>8.8</td>
+      <td>21.4</td>
+    </tr><tr>
+      <td class="rank medal-2">2</td>
+      <td>Adengo</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>12</td>
+      <td><strong>10.1</strong></td>
+      <td>6.0</td>
+      <td>16.1</td>
+    </tr><tr>
+      <td class="rank medal-3">3</td>
+      <td>OJ</td><td>Santos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>12</td>
+      <td><strong>10.1</strong></td>
+      <td>6.0</td>
+      <td>16.1</td>
+    </tr><tr>
+      <td class="rank ">4</td>
+      <td>Lucky</td><td>Santos</td>
+      <td><span class="pos-badge pos-Forward">FWD</span></td>
+      <td>12</td>
+      <td><strong>8.5</strong></td>
+      <td>4.8</td>
+      <td>13.3</td>
+    </tr><tr>
+      <td class="rank ">5</td>
+      <td>Reagan</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Defender">DEF</span></td>
+      <td>12</td>
+      <td><strong>7.1</strong></td>
+      <td>3.6</td>
+      <td>10.7</td>
+    </tr><tr>
+      <td class="rank ">6</td>
+      <td>Aijuka</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Defender">DEF</span></td>
+      <td>12</td>
+      <td><strong>7.0</strong></td>
+      <td>3.6</td>
+      <td>10.6</td>
+    </tr><tr>
+      <td class="rank ">7</td>
+      <td>Raba</td><td>Santos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>12</td>
+      <td><strong>6.2</strong></td>
+      <td>2.4</td>
+      <td>8.6</td>
+    </tr><tr>
+      <td class="rank ">8</td>
+      <td>Cedo</td><td>Galacticos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>11</td>
+      <td><strong>5.9</strong></td>
+      <td>2.4</td>
+      <td>8.3</td>
+    </tr><tr>
+      <td class="rank ">9</td>
+      <td>Jeffers</td><td>Law FC</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>11</td>
+      <td><strong>5.9</strong></td>
+      <td>2.4</td>
+      <td>8.3</td>
+    </tr><tr>
+      <td class="rank ">10</td>
+      <td>Nate</td><td>Santos</td>
+      <td><span class="pos-badge pos-Midfielder">MID</span></td>
+      <td>11</td>
+      <td><strong>5.9</strong></td>
+      <td>2.4</td>
+      <td>8.3</td>
+    </tr></tbody>
+      </table>
+    </div>
+  </section>
+  <section>
+    <h2>Team Projections — Next Season</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Team</th><th>Proj Goals</th><th>Proj Assists</th><th>Goals / App</th><th>Trend vs 2025</th></tr></thead>
+        <tbody><tr>
+      <td class="rank medal-1">1</td>
+      <td>Law FC</td>
+      <td>52.4</td><td>18.5</td>
+      <td>0.448</td>
+      <td class="risk-low">▲ 54% goals</td>
+    </tr><tr>
+      <td class="rank medal-2">2</td>
+      <td>Galacticos</td>
+      <td>49.9</td><td>16.8</td>
+      <td>0.434</td>
+      <td class="risk-low">▲ 35% goals</td>
+    </tr><tr>
+      <td class="rank medal-3">3</td>
+      <td>Santos</td>
+      <td>38.4</td><td>18.0</td>
+      <td>0.541</td>
+      <td class="risk-med">▼ 15% goals</td>
+    </tr><tr>
+      <td class="rank ">4</td>
+      <td>Dragons FC</td>
+      <td>27.1</td><td>6.0</td>
+      <td>0.315</td>
+      <td class="risk-low">▲ 59% goals</td>
+    </tr></tbody>
+      </table>
+    </div>
+  </section>
+  <section>
+    <div class="grid-2">
+      <div>
+        <h2>⚠️ Discipline Risk Flags</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Player</th><th>Team</th><th>Proj Yellows</th><th>Proj Reds</th><th>Risk</th></tr></thead>
+            <tbody><tr>
+      <td>Gareth</td><td>Dragons FC</td>
+      <td>4.9</td><td>0.0</td>
+      <td><span class="risk-high">● HIGH (4.9)</span></td>
+    </tr><tr>
+      <td>Crivin</td><td>Galacticos</td>
+      <td>2.4</td><td>0.0</td>
+      <td><span class="risk-med">● MED (2.4)</span></td>
+    </tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2>🚀 Breakout Candidates</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Player</th><th>Team</th><th>Apps</th><th>Goals/Game</th><th>Proj Goals</th></tr></thead>
+            <tbody><tr>
+      <td>Humble <span class="breakout-chip">🔥 Hottest</span></td><td>Dragons FC</td>
+      <td>5</td>
+      <td><strong class="risk-low">0.60</strong></td>
+      <td>1.5</td>
+    </tr><tr>
+      <td>Owino</td><td>Law FC</td>
+      <td>6</td>
+      <td><strong class="risk-low">0.50</strong></td>
+      <td>3.2</td>
+    </tr><tr>
+      <td>Oroma</td><td>Santos</td>
+      <td>3</td>
+      <td><strong class="risk-low">1.67</strong></td>
+      <td>0.5</td>
+    </tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>Generated by Football ML Predictor · Ridge Regression · 2025 Season Data · 42 Players · 4 Teams</footer>
+</body>
+</html>
